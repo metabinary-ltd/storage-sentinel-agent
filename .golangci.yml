@@ -1,0 +1,127 @@
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - vendor
+    - .git
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  goconst:
+    min-len: 3
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+  gocyclo:
+    min-complexity: 15
+  gofumpt:
+    lang-version: "1.24"
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 120
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: US
+  nolintlint:
+    allow-leading-space: true
+    allow-unused: false
+    require-explanation: false
+    require-specific: false
+  revive:
+    min-confidence: 0
+    rules:
+      - name: exported
+        severity: warning
+      - name: var-naming
+        severity: warning
+      - name: var-declaration
+        severity: warning
+      - name: package-comments
+        severity: warning
+      - name: range
+        severity: warning
+      - name: increment-decrement
+        severity: warning
+      - name: error-return
+        severity: warning
+  staticcheck:
+    checks: ["all"]
+  unused:
+    check-exported: false
+  gosec:
+    severity: medium
+    confidence: medium
+
+linters:
+  enable:
+    - errcheck
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gofumpt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+  disable:
+    - deadcode
+    - structcheck
+    - varcheck
+    - maligned
+    - interfacer
+    - scopelint
+    - gochecknoglobals
+    - gochecknoinits
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+        - goconst
+        - gocritic
+    - text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+      linters:
+        - errcheck
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude:
+    - "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+    - "exported function .* should have comment or be unexported"
+    - "package comment should be of the form"
+    - "comment on exported"
+  exclude-use-default: false
+

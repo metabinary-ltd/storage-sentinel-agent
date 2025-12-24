@@ -1,0 +1,27 @@
+[Unit]
+Description=Storage Sentinel Host Agent
+Documentation=https://github.com/metabinary-ltd/storage-sentinel-agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/storagesentinel
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/storagesentinel /var/log
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+

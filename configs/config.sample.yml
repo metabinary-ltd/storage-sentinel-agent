@@ -1,0 +1,57 @@
+storage:
+  include_devices: []
+  exclude_devices: []
+  zfs_enable: true
+
+scheduling:
+  smart_collect_interval: "6h"
+  zfs_status_interval: "15m"
+  smart_short_interval: "168h"
+  smart_long_interval: "720h"
+  zfs_scrub_interval: "720h"
+
+alerts:
+  min_severity: "warning"
+  debounce_window: "6h"
+  temperature_thresholds:
+    hdd_warning: 55.0   # in Celsius (default: 55°C)
+    hdd_critical: 70.0  # in Celsius (default: 70°C)
+    nvme_warning: 70.0  # in Celsius (default: 70°C)
+    nvme_critical: 85.0 # in Celsius (default: 85°C)
+
+notifications:
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+    from: ""
+    to: []
+  webhooks: []
+
+cloud:
+  enabled: false
+  endpoint: "https://api.storage-sentinel.com"
+  api_token: ""
+
+api:
+  bind_address: "127.0.0.1"
+  port: 8200
+  auth_token: ""
+
+logging:
+  level: "info"
+  debug_enable: true
+  debug_log: "/var/log/storagesentinel-debug.log"
+
+paths:
+  db_path: "/var/lib/storagesentinel/state.db"
+  log_path: "/var/log/storagesentinel.log"
+
+tools:
+  smartctl: "smartctl"
+  nvme: "nvme"
+  zpool: "zpool"
+  zfs: "zfs"
+
