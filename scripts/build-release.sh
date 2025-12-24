@@ -42,7 +42,7 @@ info "Building version: $VERSION"
 cd "$PROJECT_ROOT"
 
 # Create release directory
-RELEASE_DIR="release-${VERSION}"
+RELEASE_DIR="release/${VERSION}"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 
@@ -73,12 +73,48 @@ build_binary() {
     # Build CLI
     go build -ldflags="$LDFLAGS" -o "$RELEASE_DIR/storagesentinelctl-${suffix}" ./cmd/storagesentinelctl
     
-    # Create tarball for this architecture
+    # Create package directory for this architecture
+    local package_dir="$RELEASE_DIR/storagesentinel-${VERSION}-${suffix}"
+    rm -rf "$package_dir"
+    mkdir -p "$package_dir"
+    
+    # Copy binaries
+    cp "$RELEASE_DIR/storagesentinel-${suffix}" "$package_dir/storagesentinel"
+    cp "$RELEASE_DIR/storagesentinelctl-${suffix}" "$package_dir/storagesentinelctl"
+    chmod +x "$package_dir/storagesentinel" "$package_dir/storagesentinelctl"
+    
+    # Copy config sample
+    if [ -f "$PROJECT_ROOT/configs/config.sample.yml" ]; then
+        mkdir -p "$package_dir/configs"
+        cp "$PROJECT_ROOT/configs/config.sample.yml" "$package_dir/configs/"
+    else
+        warn "config.sample.yml not found, skipping..."
+    fi
+    
+    # Copy systemd service file
+    if [ -d "$PROJECT_ROOT/systemd" ]; then
+        mkdir -p "$package_dir/systemd"
+        cp -r "$PROJECT_ROOT/systemd"/* "$package_dir/systemd/"
+    else
+        warn "systemd directory not found, skipping..."
+    fi
+    
+    # Copy deploy script
+    if [ -f "$PROJECT_ROOT/scripts/deploy.sh" ]; then
+        mkdir -p "$package_dir/scripts"
+        cp "$PROJECT_ROOT/scripts/deploy.sh" "$package_dir/scripts/"
+        chmod +x "$package_dir/scripts/deploy.sh"
+    else
+        warn "deploy.sh not found, skipping..."
+    fi
+    
+    # Create tarball from package directory
     cd "$RELEASE_DIR"
-    tar -czf "storagesentinel-${VERSION}-${suffix}.tar.gz" \
-        "storagesentinel-${suffix}" \
-        "storagesentinelctl-${suffix}"
+    tar -czf "storagesentinel-${VERSION}-${suffix}.tar.gz" "storagesentinel-${VERSION}-${suffix}"
     cd "$PROJECT_ROOT"
+    
+    # Clean up package directory (keep tarball)
+    rm -rf "$package_dir"
     
     info "✓ Built ${suffix}"
 }

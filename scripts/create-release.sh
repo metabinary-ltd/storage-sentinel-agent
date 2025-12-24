@@ -28,7 +28,7 @@ warn() {
 
 # Configuration
 REPO="${GITHUB_REPOSITORY:-metabinary-ltd/storage-sentinel-agent}"
-REMOTE="${GITHUB_REMOTE:-storage-sentinel-agent}"
+REMOTE="${GITHUB_REMOTE:-origin}"
 
 usage() {
     cat <<EOF

@@ -92,6 +92,18 @@ check_dependencies() {
     fi
 }
 
+get_latest_release() {
+    # Get the latest release tag from GitHub API
+    local repo="metabinary-ltd/storage-sentinel-agent"
+    if command -v curl &> /dev/null; then
+        curl -s "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+    elif command -v wget &> /dev/null; then
+        wget -qO- "https://api.github.com/repos/${repo}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+    else
+        error "Neither curl nor wget found. Please install one of them."
+    fi
+}
+
 download_binaries() {
     local arch=$1
     local temp_dir
@@ -129,7 +141,28 @@ download_binaries() {
         elif [ -f "$PROJECT_ROOT/storagesentinel" ] && [ -f "$PROJECT_ROOT/storagesentinelctl" ]; then
             echo "$PROJECT_ROOT"
         else
-            error "Binaries not found. Please provide --url, --local-dir, or place binaries in current directory."
+            # Auto-download latest release if no binaries found
+            info "No local binaries found. Downloading latest release..."
+            local latest_tag=$(get_latest_release)
+            if [ -z "$latest_tag" ]; then
+                error "Failed to get latest release version. Please provide --url or --local-dir."
+            fi
+            local version="${latest_tag#v}"  # Remove 'v' prefix if present
+            local download_url="https://github.com/metabinary-ltd/storage-sentinel-agent/releases/download/${latest_tag}/storagesentinel-${version}-linux-${arch}.tar.gz"
+            
+            temp_dir=$(mktemp -d)
+            info "Downloading latest release: ${latest_tag}"
+            
+            if command -v curl &> /dev/null; then
+                curl -L -o "$temp_dir/storagesentinel.tar.gz" "$download_url" || error "Failed to download latest release"
+            elif command -v wget &> /dev/null; then
+                wget -O "$temp_dir/storagesentinel.tar.gz" "$download_url" || error "Failed to download latest release"
+            else
+                error "Neither curl nor wget found. Please install one of them."
+            fi
+            
+            tar -xzf "$temp_dir/storagesentinel.tar.gz" -C "$temp_dir" || error "Failed to extract archive"
+            echo "$temp_dir"
         fi
     fi
 }
